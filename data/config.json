@@ -1,0 +1,44 @@
+{
+  "appName": "GPT Garden Final",
+  "locationName": "Bella Vista, AR",
+  "latitude": 36.4812,
+  "longitude": -94.2724,
+  "timezone": "America/Chicago",
+  "zone": "6b",
+  "frost": {
+    "avgLastFrostRange": "Apr 11\u201320",
+    "conservativeLastFrostMonth": 4,
+    "conservativeLastFrostDay": 20,
+    "safePlantMonth": 4,
+    "safePlantDay": 27
+  },
+  "sowWindow": {
+    "start": "2026-02-16",
+    "end": "2026-02-20"
+  },
+  "lights": {
+    "on": "05:15",
+    "off": "22:45",
+    "note": "Barrina T5 strips (~2\u20136 in canopy), Spider Farmer SF300 (~8 in above DWC), Spider Farmer SF600 (~12 in). All on one Hue schedule."
+  },
+  "environment": {
+    "tempF": "66\u201369",
+    "rh": "59%",
+    "soil": "FoxFarm Ocean Forest",
+    "feed": "FoxFarm Big Bloom"
+  },
+  "hardening": {
+    "warmMoveOutOffsetDays": 7,
+    "tomatoMoveOutOffsetDays": 12,
+    "coolMoveOutOffsetDays": -14,
+    "pepperMinNight": 55,
+    "tomatoMinNight": 50,
+    "lettuceMinNight": 28,
+    "defaultProtocolDays": 10
+  },
+  "notes": {
+    "indoorPermanent": "DWC and herbs are permanent indoor.",
+    "outdoorContainers": "Lettuce, tomatoes, soil peppers, superhots, and bonsai are container plants and can use hardening guidance.",
+    "bonsai": "Training is TBD. Treat current bonsai entries as seedlings/young starts."
+  }
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPT Garden Final</title>
+  <meta name="description" content="Indoor and container garden operations dashboard for Bella Vista, AR. DWC, soil, bonsai, weather, hardening off, and daily logs.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div>
+        <h1>🌱 GPT Garden Final</h1>
+        <p id="subtitle">Bella Vista, AR · dark theme · weather goblin approved</p>
+      </div>
+      <div class="top-actions">
+        <span id="save-msg">saved</span>
+        <button class="btn" id="export-btn">Export</button>
+        <label class="btn">Import<input id="import-file" type="file" accept=".json" hidden></label>
+      </div>
+    </header>
+
+    <section id="weather-panel" class="panel"></section>
+
+    <main class="layout">
+      <aside class="sidebar panel">
+        <div id="filter-bar" class="filter-bar"></div>
+        <div id="plant-list" class="plant-list"></div>
+      </aside>
+      <section id="detail" class="detail panel"></section>
+    </main>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>
