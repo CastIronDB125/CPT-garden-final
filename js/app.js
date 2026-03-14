@@ -174,12 +174,51 @@ function renderWeatherFallback(msg){
   const selected=pickSelectedPlant(); const elig=outdoorEligibility(selected); const profile=effectiveProfile();
   $('weather-panel').innerHTML = `<div class="wx-hero"><div class="kicker">Daily weather briefing</div><h2 style="margin:0 0 6px;font-family:var(--serif)">${escapeHtml(state.config.locationName)}</h2><div class="alert warn">${escapeHtml(msg)} The tracker still works; live forecast just took a coffee break.</div></div>${renderWeatherOperations(selected, elig, profile, null)}`;
 }
+function buildSynopsis(selected, elig, profileKey, hours){
+  const prof = PROFILE_SETTINGS[profileKey] || PROFILE_SETTINGS.general;
+  const low = state.weather?.daily?.temperature_2m_min?.[0];
+  const high = state.weather?.daily?.temperature_2m_max?.[0];
+  const label = prof.label;
+  if(state.weatherMode==='manual'){
+    if(!hours || !hours.length) return `Manual preview for ${label}: waiting on hourly weather.`;
+    const good = hours.filter(h=>h.score==='good').length;
+    const okay = hours.filter(h=>h.score==='okay').length;
+    const firstGood = hours.find(h=>h.score==='good');
+    const coldTonight = low != null && low < prof.bringInTemp;
+    if(coldTonight){
+      return `${label} preview: ${firstGood ? `usable around ${formatHour(firstGood.time)}` : 'thin outdoor options'} today, but tonight drops near ${Math.round(low)}°, so keep it brief and bring them back in.`;
+    }
+    return `${label} preview: ${good} good and ${okay} okay hours in the next block. ${high != null ? `High near ${Math.round(high)}°.` : ''}`.trim();
+  }
+  if(elig.kind==='indoor'){
+    return `${selected?.plant || 'Selected plant'} is flagged indoor, so outdoor timing is bypassed and the panel switches to indoor care logic.`;
+  }
+  if(!hours || !hours.length){
+    return `${selected?.plant || label} is waiting on hourly weather data before making outdoor recommendations.`;
+  }
+  const good = hours.filter(h=>h.score==='good').length;
+  const okay = hours.filter(h=>h.score==='okay').length;
+  const firstGood = hours.find(h=>h.score==='good');
+  const firstBadCold = hours.find(h=>h.score==='bad' && h.issues.includes('too cold'));
+  if(profileKey==='lettuce' || profileKey==='bonsai'){
+    if(good || okay) return `Reasonable day for ${label.toLowerCase()} exposure${firstGood ? ` starting around ${formatHour(firstGood.time)}` : ''}, but still watch the wind and evening lows.`;
+    return `${label} can tolerate more than peppers, but this forecast is still stingy. Keep exposure brief.`;
+  }
+  if(firstBadCold || (low != null && low < prof.bringInTemp)){
+    return `${selected?.plant || label} gets some daytime potential${firstGood ? ` around ${formatHour(firstGood.time)}` : ''}, but tonight bottoms near ${Math.round(low)}°, so the hardening math should obey reality, not optimism.`;
+  }
+  return `${selected?.plant || label} has ${good} good and ${okay} okay outdoor hours in the next block. Still check wind, UV, and your plant's current mood.`;
+}
+
 function renderWeather(){
   const wx=state.weather, current=wx.current, daily=wx.daily, selected=pickSelectedPlant(), elig=outdoorEligibility(selected), profileKey=effectiveProfile(), profile=PROFILE_SETTINGS[profileKey], hours=buildHourlyWindow(profileKey);
   const sunRise=new Date(daily.sunrise[0]), sunSet=new Date(daily.sunset[0]);
+  const synopsis = buildSynopsis(selected, elig, profileKey, hours);
   $('weather-panel').innerHTML = `
     <div class="wx-hero">
       <div class="kicker">Daily weather briefing</div>
+      <div style="font-family:var(--serif);font-size:clamp(18px,2vw,28px);margin-bottom:8px">${escapeHtml(state.config.locationName)} · Zone ${escapeHtml(state.config.zone)}</div>
+      <div class="alert info" style="margin-bottom:12px">${escapeHtml(synopsis)}</div>
       <div class="wx-grid">
         <div class="wx-card wx-big">
           <div class="metric-label">Current</div>
@@ -242,7 +281,7 @@ function renderWeatherOperations(selected, elig, profileKey, hours){
     <div class="outdoor-window-header">
       <div>
         <h3>Today outdoors window</h3>
-        <div class="muted">Hour-by-hour timing for hardening, watering, and hauling the green weirdos back inside.</div>
+        <div class="muted">Hour-by-hour timing for hardening, watering, and hauling the green weirdos back inside. ${state.weatherMode==='manual' ? `Manual preview: ${PROFILE_SETTINGS[state.manualProfile].label}.` : (selected ? `Auto profile: ${PROFILE_SETTINGS[profileKey].label} for ${escapeHtml(selected.plant)}.` : `Auto profile: ${PROFILE_SETTINGS[profileKey].label}.`)}</div>
       </div>
       <div class="legend"><span class="pill good">GOOD</span><span class="pill okay">OKAY</span><span class="pill bad">BAD</span></div>
     </div>
@@ -254,7 +293,9 @@ function renderReadinessSummary(hours, selected){
   const harden=bestWindow(hours,'good') || bestWindow(hours,'okay') || 'No clean window';
   const wateringHour = hours.find(h=>h.score!=='bad' && h.temp<78);
   const bringIn = hours.find(h=>h.score==='bad' && h.issues.some(i=>i==='too cold' || i==='dark' || i==='rain risk'));
-  return `<div class="window-grid compact"><div class="window-card"><div class="metric-label">Hardening</div><div class="metric-value">${harden}</div><div class="muted">${selected ? escapeHtml(selected.plant) : 'Selected profile'} uses outdoor timing.</div></div><div class="window-card"><div class="metric-label">Watering</div><div class="metric-value">${wateringHour ? formatHour(wateringHour.time) : 'Use judgment'}</div><div class="muted">Aim for lower wind and milder temps.</div></div><div class="window-card"><div class="metric-label">Bring-back-in</div><div class="metric-value">${bringIn ? formatHour(bringIn.time) : 'Watch sunset'}</div><div class="muted">Bring in before forecast turns feral.</div></div></div>`;
+  const good=hours.filter(h=>h.score==='good').length, okay=hours.filter(h=>h.score==='okay').length, bad=hours.filter(h=>h.score==='bad').length;
+  const modeLabel = state.weatherMode==='manual' ? `${PROFILE_SETTINGS[state.manualProfile].label} preview` : (selected ? `${selected.plant}` : 'Selected profile');
+  return `<div class="window-grid compact"><div class="window-card"><div class="metric-label">Hardening</div><div class="metric-value">${harden}</div><div class="muted">${escapeHtml(modeLabel)} · ${good} good / ${okay} okay / ${bad} bad hours.</div></div><div class="window-card"><div class="metric-label">Watering</div><div class="metric-value">${wateringHour ? formatHour(wateringHour.time) : 'Use judgment'}</div><div class="muted">Aim for lower wind and milder temps.</div></div><div class="window-card"><div class="metric-label">Bring-back-in</div><div class="metric-value">${bringIn ? formatHour(bringIn.time) : 'Watch sunset'}</div><div class="muted">Bring in before forecast turns feral.</div></div></div>`;
 }
 function renderOutdoorWindow(hours){
   if(!hours) return '<div class="muted">Hourly forecast not available yet.</div>';
