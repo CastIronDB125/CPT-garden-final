@@ -108,6 +108,7 @@ async function fetchWeather(){
   const c=state.config;
   const params=new URLSearchParams({
     latitude:c.latitude, longitude:c.longitude, timezone:c.timezone,
+    temperature_unit:'fahrenheit', wind_speed_unit:'mph', precipitation_unit:'inch',
     current:['temperature_2m','relative_humidity_2m','apparent_temperature','wind_speed_10m','wind_gusts_10m','weather_code','is_day'].join(','),
     daily:['temperature_2m_max','temperature_2m_min','precipitation_probability_max','precipitation_sum','uv_index_max','sunrise','sunset','daylight_duration','weather_code'].join(','),
     hourly:['temperature_2m','relative_humidity_2m','apparent_temperature','wind_speed_10m','wind_gusts_10m','precipitation_probability','precipitation','uv_index','weather_code','is_day'].join(',')
@@ -171,7 +172,7 @@ function formatDuration(seconds){ const h=Math.floor(seconds/3600); const m=Math
 function renderWeatherLoading(){ $('weather-panel').innerHTML = `<div class="wx-hero"><div class="kicker">Daily weather briefing</div><div class="muted">Loading Bella Vista forecast… crunching the weather goblins.</div></div>`; }
 function renderWeatherFallback(msg){
   const selected=pickSelectedPlant(); const elig=outdoorEligibility(selected); const profile=effectiveProfile();
-  $('weather-panel').innerHTML = `<div class="wx-hero"><div class="kicker">Daily weather briefing</div><h2 style="margin:0 0 6px;font-family:var(--serif)">${escapeHtml(state.config.locationName)}</h2><div class="alert warn">${escapeHtml(msg)} The tracker still works; live forecast just took a coffee break.</div></div>${renderInfoStrip(selected, elig, profile, null)}`;
+  $('weather-panel').innerHTML = `<div class="wx-hero"><div class="kicker">Daily weather briefing</div><h2 style="margin:0 0 6px;font-family:var(--serif)">${escapeHtml(state.config.locationName)}</h2><div class="alert warn">${escapeHtml(msg)} The tracker still works; live forecast just took a coffee break.</div></div>${renderWeatherOperations(selected, elig, profile, null)}`;
 }
 function renderWeather(){
   const wx=state.weather, current=wx.current, daily=wx.daily, selected=pickSelectedPlant(), elig=outdoorEligibility(selected), profileKey=effectiveProfile(), profile=PROFILE_SETTINGS[profileKey], hours=buildHourlyWindow(profileKey);
@@ -189,7 +190,7 @@ function renderWeather(){
         <div class="wx-card">
           <div class="metric-label">Today</div>
           <div class="metric-value">${Math.round(daily.temperature_2m_max[0])}° / ${Math.round(daily.temperature_2m_min[0])}°</div>
-          <div class="muted">Rain ${daily.precipitation_probability_max[0]||0}% · ${daily.precipitation_sum[0]||0} mm</div>
+          <div class="muted">Rain ${daily.precipitation_probability_max[0]||0}% · ${(daily.precipitation_sum[0]||0).toFixed(2)} in</div>
           <div class="muted">Wind ${Math.round(current.wind_speed_10m)} mph · gust ${Math.round(current.wind_gusts_10m||0)}</div>
           <div class="muted">UV max ${Math.round((daily.uv_index_max[0]||0)*10)/10}</div>
         </div>
@@ -209,17 +210,18 @@ function renderWeather(){
         </div>
       </div>
     </div>
-    ${renderInfoStrip(selected, elig, profileKey, hours)}
-    <div class="forecast-strip">${daily.time.slice(0,7).map((t,i)=>`<div class="forecast-card"><div class="metric-label">${new Date(t).toLocaleDateString('en-US',{weekday:'short'})}</div><div class="metric-value">${Math.round(daily.temperature_2m_max[i])}° / ${Math.round(daily.temperature_2m_min[i])}°</div><div class="muted">${weatherText(daily.weather_code[i])}</div><div class="muted">Rain ${daily.precipitation_probability_max[i]||0}%</div><div class="muted">UV ${Math.round((daily.uv_index_max[i]||0)*10)/10}</div></div>`).join('')}</div>`;
+    ${renderWeatherOperations(selected, elig, profileKey, hours)}
+    <div class="forecast-strip">${daily.time.slice(0,7).map((t,i)=>`<div class="forecast-card"><div class="metric-label">${new Date(t).toLocaleDateString('en-US',{weekday:'short'})}</div><div class="metric-value">${Math.round(daily.temperature_2m_max[i])}° / ${Math.round(daily.temperature_2m_min[i])}°</div><div class="muted">${weatherText(daily.weather_code[i])}</div><div class="muted">Rain ${daily.precipitation_probability_max[i]||0}% · ${(daily.precipitation_sum[i]||0).toFixed(2)} in</div><div class="muted">UV ${Math.round((daily.uv_index_max[i]||0)*10)/10}</div></div>`).join('')}</div>`;
 }
-function renderInfoStrip(selected, elig, profileKey, hours){
+function renderWeatherOperations(selected, elig, profileKey, hours){
   const autoText = state.weatherMode==='auto' ? (selected ? `Auto from ${escapeHtml(selected.plant)}` : 'Auto default') : `Manual override · ${PROFILE_SETTINGS[state.manualProfile].label}`;
   const ops = buildOpsQueue().slice(0,4);
+  const showOutdoor = state.weatherMode === 'manual' || elig.kind === 'outdoor';
   return `<div class="info-strip">
     <div class="info-box">
       <div class="window-head"><h3>Outdoor readiness</h3><div class="toggle-row">${Object.entries(PROFILE_SETTINGS).map(([k,v])=>`<button class="toggle ${((state.weatherMode==='manual'&&state.manualProfile===k)||(state.weatherMode==='auto'&&profileKey===k))?'active':''}" onclick="setProfileMode('${k}')">${escapeHtml(v.label)}</button>`).join('')}<button class="toggle ${state.weatherMode==='auto'?'active':''}" onclick="setAutoMode()">Auto</button></div></div>
       <div class="muted" style="margin-bottom:8px">${autoText}</div>
-      ${elig.kind==='outdoor' ? renderOutdoorWindow(hours) : renderIndoorWindow(selected)}
+      ${showOutdoor ? renderReadinessSummary(hours, selected) : renderIndoorSummary(selected)}
     </div>
     <div class="info-box">
       <h3>Grow room constants</h3>
@@ -235,17 +237,31 @@ function renderInfoStrip(selected, elig, profileKey, hours){
       <h3>Ops queue</h3>
       ${ops.length ? `<div class="list">${ops.map(x=>`<div class="list-item"><span>${escapeHtml(x.title)}</span><span class="muted">${escapeHtml(x.meta)}</span></div>`).join('')}</div>` : '<div class="muted">No urgent goblins right now.</div>'}
     </div>
+  </div>
+  <div class="outdoor-window-wrap">
+    <div class="outdoor-window-header">
+      <div>
+        <h3>Today outdoors window</h3>
+        <div class="muted">Hour-by-hour timing for hardening, watering, and hauling the green weirdos back inside.</div>
+      </div>
+      <div class="legend"><span class="pill good">GOOD</span><span class="pill okay">OKAY</span><span class="pill bad">BAD</span></div>
+    </div>
+    ${showOutdoor ? renderOutdoorWindow(hours) : renderIndoorWindow(selected)}
   </div>`;
+}
+function renderReadinessSummary(hours, selected){
+  if(!hours) return '<div class="window-grid compact"><div class="window-card"><div class="metric-label">Status</div><div class="metric-value">Waiting on weather</div><div class="muted">Hourly forecast not available yet.</div></div></div>';
+  const harden=bestWindow(hours,'good') || bestWindow(hours,'okay') || 'No clean window';
+  const wateringHour = hours.find(h=>h.score!=='bad' && h.temp<78);
+  const bringIn = hours.find(h=>h.score==='bad' && h.issues.some(i=>i==='too cold' || i==='dark' || i==='rain risk'));
+  return `<div class="window-grid compact"><div class="window-card"><div class="metric-label">Hardening</div><div class="metric-value">${harden}</div><div class="muted">${selected ? escapeHtml(selected.plant) : 'Selected profile'} uses outdoor timing.</div></div><div class="window-card"><div class="metric-label">Watering</div><div class="metric-value">${wateringHour ? formatHour(wateringHour.time) : 'Use judgment'}</div><div class="muted">Aim for lower wind and milder temps.</div></div><div class="window-card"><div class="metric-label">Bring-back-in</div><div class="metric-value">${bringIn ? formatHour(bringIn.time) : 'Watch sunset'}</div><div class="muted">Bring in before forecast turns feral.</div></div></div>`;
 }
 function renderOutdoorWindow(hours){
   if(!hours) return '<div class="muted">Hourly forecast not available yet.</div>';
-  const harden=bestWindow(hours,'good') || bestWindow(hours,'okay') || 'No clean window';
-  const watering = hours.find(h=>h.score!=='bad' && h.temp<78) ? `${formatHour(hours.find(h=>h.score!=='bad' && h.temp<78).time)}` : 'Use judgment';
-  const bringIn = hours.find(h=>h.score==='bad' && h.issues.some(i=>i==='too cold' || i==='dark' || i==='rain risk'));
-  return `<div><div class="legend"><span class="pill good">GOOD</span><span class="pill okay">OKAY</span><span class="pill bad">BAD</span></div><div class="window-grid"><div class="window-card"><div class="metric-label">Hardening window</div><div class="metric-value">${harden}</div><div class="muted">Best hours for outdoor exposure today.</div></div><div class="window-card"><div class="metric-label">Watering window</div><div class="metric-value">${watering}</div><div class="muted">Aim for lower wind and milder temps.</div></div><div class="window-card"><div class="metric-label">Bring-back-in</div><div class="metric-value">${bringIn ? formatHour(bringIn.time) : 'Watch sunset'}</div><div class="muted">Bring in before forecast turns feral.</div></div></div><div class="hourly-strip">${hours.map(h=>`<div class="hour-card ${h.score}"><div class="hour-time">${formatHour(h.time)}</div><div>${h.temp}° · feels ${h.feels}°</div><div class="hour-small">RH ${h.humidity}% · wind ${h.wind}</div><div class="hour-small">Rain ${h.rainProb}% · UV ${h.uv}</div><div class="hour-note">${escapeHtml(h.action)}</div></div>`).join('')}</div></div>`;
+  return `<div class="hourly-strip">${hours.map(h=>`<div class="hour-card ${h.score}"><div class="hour-time">${formatHour(h.time)}</div><div>${h.temp}° · feels ${h.feels}°</div><div class="hour-small">RH ${h.humidity}% · wind ${h.wind}${h.gust ? ` · gust ${h.gust}` : ''}</div><div class="hour-small">Rain ${h.rainProb}% · ${h.rain.toFixed ? h.rain.toFixed(2) : h.rain} in · UV ${h.uv}</div><div class="hour-note">${escapeHtml(h.action)}</div></div>`).join('')}</div>`;
 }
-function renderIndoorWindow(selected){
-  if(!selected) return '<div class="muted">Select a plant for indoor guidance.</div>';
+function renderIndoorSummary(selected){
+  if(!selected) return '<div class="window-grid compact"><div class="window-card"><div class="metric-label">Status</div><div class="metric-value">Select a plant</div><div class="muted">Indoor guidance appears when a plant is selected.</div></div></div>';
   let harden='Not applicable', watering='Check by root zone', bring='Stay inside', note='';
   if(selected.system==='DWC'){
     watering='Check AM / PM';
@@ -261,7 +277,17 @@ function renderIndoorWindow(selected){
     note='Use pot weight, top-inch dryness, and targeted root-zone watering.';
   }
   const status=getWateringStatus(selected);
-  return `<div class="window-grid"><div class="window-card"><div class="metric-label">Hardening</div><div class="metric-value">${harden}</div><div class="muted">Permanent indoor destination.</div></div><div class="window-card"><div class="metric-label">Watering</div><div class="metric-value">${watering}</div><div class="muted">${status.next}</div></div><div class="window-card"><div class="metric-label">Bring-back-in</div><div class="metric-value">${bring}</div><div class="muted">${note}</div></div></div>`;
+  const profileNote = 'Auto mode sees this plant as indoor, so hardening timing is bypassed.';
+  return `<div class="window-grid compact"><div class="window-card"><div class="metric-label">Hardening</div><div class="metric-value">${harden}</div><div class="muted">${profileNote}</div></div><div class="window-card"><div class="metric-label">Watering</div><div class="metric-value">${watering}</div><div class="muted">${status.next}</div></div><div class="window-card"><div class="metric-label">Bring-back-in</div><div class="metric-value">${bring}</div><div class="muted">${note}</div></div></div>`;
+}
+function renderIndoorWindow(selected){
+  if(!selected) return '<div class="muted">Select a plant for indoor guidance.</div>';
+  let note='';
+  if(selected.system==='DWC') note='Indoor DWC logic is active. Manual override only changes the weather profile, not the fact that this plant lives inside.';
+  else if(selected.category==='Herb') note='Permanent indoor herb. Use this panel for indoor watering guidance, not hardening.';
+  else if(selected.category==='Bonsai') note='Indoor or training-start bonsai. Keep drainage sharp and avoid overwatering.';
+  else note='Indoor plant selected. Manual override can still preview outdoor timing if you want it.';
+  return `<div class="window-grid compact" style="margin-bottom:12px"><div class="window-card"><div class="metric-label">Indoor note</div><div class="metric-value">Stay inside</div><div class="muted">${note}</div></div></div>` + renderOutdoorWindow(buildHourlyWindow(state.manualProfile || 'general'));
 }
 function renderFilters(){
   const filters=['All','DWC','Soil','Bonsai','Uncertain','Harden Off','Permanent Indoor'];

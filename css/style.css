@@ -27,12 +27,15 @@ a{color:inherit} button,input,select,textarea{font:inherit}
 .wx-big{display:flex;flex-direction:column;justify-content:center}.wx-temp{font-size:44px;line-height:1;color:var(--text)} .wx-desc{margin-top:4px;color:var(--text2)} .wx-sub{color:var(--text3);font-size:11px}
 .metric-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}.metric-value{font-size:18px}.muted{color:var(--text3)}
 .info-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.outdoor-window-wrap{padding:12px 16px 16px;border-bottom:1px solid var(--border)}
+.outdoor-window-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.outdoor-window-header h3{margin:0 0 4px;font-size:12px;color:var(--text2)}
 .info-box{border:1px solid var(--border);border-radius:12px;padding:12px}.info-box h3{margin:0 0 6px;font-size:12px;color:var(--text2)}
 .window-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
 .toggle-row{display:flex;gap:8px;flex-wrap:wrap}.toggle{padding:6px 10px;border-radius:999px;border:1px solid var(--border2);background:var(--bg3);font-size:11px;cursor:pointer}.toggle.active{border-color:var(--green);color:var(--green);background:var(--green-bg)}
 .legend{display:flex;gap:8px;align-items:center}.pill{font-size:10px;border-radius:999px;padding:4px 8px;border:1px solid var(--border2)}.good{color:var(--green);background:var(--green-bg)} .okay{color:var(--amber);background:var(--amber-bg)} .bad{color:var(--red);background:var(--red-bg)}
-.window-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}.window-card{border:1px solid var(--border);border-radius:12px;padding:12px}
-.hourly-strip{display:grid;grid-template-columns:repeat(12,minmax(100px,1fr));gap:8px;overflow-x:auto;padding-bottom:6px}.hour-card{border:1px solid var(--border);border-radius:12px;padding:10px;min-width:100px;background:rgba(255,255,255,.01)} .hour-card.good{border-color:#315b2f}.hour-card.okay{border-color:#5a481d}.hour-card.bad{border-color:#5e2626}
+.window-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}.window-grid.compact{margin-bottom:0}.window-card{border:1px solid var(--border);border-radius:12px;padding:12px}
+.hourly-strip{display:grid;grid-template-columns:repeat(12,minmax(120px,1fr));gap:8px;overflow-x:auto;padding-bottom:6px}.hour-card{border:1px solid var(--border);border-radius:12px;padding:10px;min-width:100px;background:rgba(255,255,255,.01)} .hour-card.good{border-color:#315b2f}.hour-card.okay{border-color:#5a481d}.hour-card.bad{border-color:#5e2626}
 .hour-time{font-weight:600;margin-bottom:6px}.hour-small{font-size:11px;color:var(--text2)}.hour-note{margin-top:6px;font-size:11px;color:var(--text3)}
 .forecast-strip{display:grid;grid-template-columns:repeat(7,minmax(120px,1fr));gap:10px;padding:0 16px 16px;overflow-x:auto}.forecast-card{border:1px solid var(--border);border-radius:12px;padding:12px}
 .layout{display:grid;grid-template-columns:300px 1fr;gap:16px;margin-top:16px;align-items:start}
@@ -48,4 +51,4 @@ input,select,textarea{width:100%;background:var(--bg);border:1px solid var(--bor
 .alert{border-radius:12px;padding:12px;border:1px solid var(--border)}.alert.info{background:var(--blue-bg);color:var(--blue)}.alert.warn{background:var(--amber-bg);color:var(--amber)}
 .table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px}.table th{color:var(--text2)}
 @media (max-width: 1100px){.wx-grid,.window-grid,.metrics{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.sidebar{position:relative;top:auto;max-height:none}.forecast-strip{grid-template-columns:repeat(7,180px)}}
-@media (max-width: 700px){#app{padding:8px}.topbar{flex-direction:column}.wx-grid,.window-grid,.info-strip,.cols2,.metrics,.form-grid{grid-template-columns:1fr}.forecast-strip{grid-template-columns:repeat(7,160px)}.detail-title{font-size:22px}}
+@media (max-width: 700px){#app{padding:8px}.topbar{flex-direction:column}.wx-grid,.window-grid,.info-strip,.cols2,.metrics,.form-grid{grid-template-columns:1fr}.forecast-strip{grid-template-columns:repeat(7,160px)}.detail-title{font-size:22px}.outdoor-window-header{flex-direction:column}}
