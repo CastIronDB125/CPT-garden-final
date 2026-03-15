@@ -1,5 +1,4 @@
-/* Even more transparent glass variant */
-/* Slightly more transparent glass variant */
+/* Cleaned section-glass version: three soft background panes + no weather separators */
 
 :root{
   --bg:#08100c;
@@ -135,8 +134,6 @@ button,input,select,textarea{font:inherit}
 .show{opacity:1 !important}
 
 .panel,
-.sidebar,
-.detail,
 .wx-card,
 .info-box,
 .window-card,
@@ -156,15 +153,17 @@ button,input,select,textarea{font:inherit}
 #weather-panel{
   margin-top:14px;
   overflow:hidden;
-  background:rgba(11,18,14,.56);
+  background:rgba(10,16,12,.42);
   border-radius:20px;
-  border:1px solid var(--line);
-  box-shadow:var(--shadow-lg);
+  border:1px solid rgba(120,150,105,.14);
+  box-shadow:0 10px 30px rgba(0,0,0,.18);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
 }
 
 .wx-hero{
   padding:16px;
-  border-bottom:1px solid var(--line);
+  border-bottom:none;
 }
 
 .kicker{
@@ -245,7 +244,7 @@ button,input,select,textarea{font:inherit}
   grid-template-columns:1fr 1fr 1fr;
   gap:12px;
   padding:12px 16px;
-  border-bottom:1px solid var(--line);
+  border-bottom:none;
 }
 
 .info-box{
@@ -261,7 +260,7 @@ button,input,select,textarea{font:inherit}
 
 .outdoor-window-wrap{
   padding:12px 16px 16px;
-  border-bottom:1px solid var(--line);
+  border-bottom:none;
 }
 
 .outdoor-window-header{
@@ -419,7 +418,11 @@ button,input,select,textarea{font:inherit}
   max-height:calc(100vh - 28px);
   overflow:auto;
   padding:12px;
-  background:var(--panel-strong);
+  background:rgba(10,16,12,.40);
+  border:1px solid rgba(120,150,105,.14);
+  box-shadow:0 10px 30px rgba(0,0,0,.18);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
 }
 
 .filter-bar{
@@ -482,7 +485,11 @@ button,input,select,textarea{font:inherit}
 .detail{
   padding:0;
   overflow:hidden;
-  background:var(--panel-strong);
+  background:rgba(10,16,12,.40);
+  border:1px solid rgba(120,150,105,.14);
+  box-shadow:0 10px 30px rgba(0,0,0,.18);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
 }
 
 .detail-header{
