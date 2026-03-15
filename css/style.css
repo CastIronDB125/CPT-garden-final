@@ -52,3 +52,177 @@ input,select,textarea{width:100%;background:var(--bg);border:1px solid var(--bor
 .table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:12px}.table th{color:var(--text2)}
 @media (max-width: 1100px){.wx-grid,.window-grid,.metrics{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.sidebar{position:relative;top:auto;max-height:none}.forecast-strip{grid-template-columns:repeat(7,180px)}}
 @media (max-width: 700px){#app{padding:8px}.topbar{flex-direction:column}.wx-grid,.window-grid,.info-strip,.cols2,.metrics,.form-grid{grid-template-columns:1fr}.forecast-strip{grid-template-columns:repeat(7,160px)}.detail-title{font-size:22px}.outdoor-window-header{flex-direction:column}}
+/* ===== Floating bonsai dashboard background ===== */
+
+:root {
+  --dashboard-bg-image: url("../assets/images/bonsai-background.png");
+  --bg-overlay-top: rgba(5, 10, 8, 0.56);
+  --bg-overlay-bottom: rgba(5, 10, 8, 0.76);
+
+  --glass-bg: rgba(10, 16, 13, 0.56);
+  --glass-bg-strong: rgba(10, 16, 13, 0.68);
+  --glass-border: rgba(170, 220, 165, 0.12);
+
+  --glass-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.30),
+    0 2px 10px rgba(0, 0, 0, 0.18);
+
+  --glass-shadow-hover:
+    0 14px 38px rgba(0, 0, 0, 0.36),
+    0 4px 14px rgba(0, 0, 0, 0.22);
+}
+
+/* Full-page background */
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background:
+    linear-gradient(var(--bg-overlay-top), var(--bg-overlay-bottom)),
+    var(--dashboard-bg-image) center center / cover no-repeat fixed;
+  background-color: #07100c;
+}
+
+/* Optional: soften any main wrapper if it had a solid bg */
+#app,
+.app-shell,
+.page-shell,
+.main-shell {
+  background: transparent !important;
+}
+
+/* Core floating panel treatment */
+.panel,
+.card,
+.section-card,
+.weather-card,
+.summary-card,
+.readiness-card,
+.ops-card,
+.forecast-day,
+.hour-card,
+.plant-list,
+.detail-panel,
+.sidebar,
+.content-panel,
+.top-card,
+.metric-card,
+.tab-panel,
+.plant-detail,
+.list-panel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  border-radius: 18px;
+}
+
+/* Slightly stronger glass for primary areas */
+header,
+.header,
+.topbar,
+.hero,
+.weather-hero,
+.weather-briefing,
+.daily-briefing,
+.outdoor-readiness,
+.grow-room,
+.ops-queue {
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(12px) saturate(125%);
+  -webkit-backdrop-filter: blur(12px) saturate(125%);
+  border-radius: 20px;
+}
+
+/* Hover polish */
+.panel:hover,
+.card:hover,
+.section-card:hover,
+.weather-card:hover,
+.summary-card:hover,
+.readiness-card:hover,
+.ops-card:hover,
+.forecast-day:hover,
+.hour-card:hover,
+.plant-list:hover,
+.detail-panel:hover,
+.sidebar:hover,
+.content-panel:hover,
+.top-card:hover,
+.metric-card:hover,
+.tab-panel:hover,
+.plant-detail:hover,
+.list-panel:hover {
+  box-shadow: var(--glass-shadow-hover);
+  transition: box-shadow 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+/* Keep text readable on glass */
+.panel,
+.card,
+.section-card,
+.weather-card,
+.summary-card,
+.readiness-card,
+.ops-card,
+.forecast-day,
+.hour-card,
+.plant-list,
+.detail-panel,
+.sidebar,
+.content-panel,
+.top-card,
+.metric-card,
+.tab-panel,
+.plant-detail,
+.list-panel,
+header,
+.header,
+.topbar,
+.hero,
+.weather-hero,
+.weather-briefing,
+.daily-briefing,
+.outdoor-readiness,
+.grow-room,
+.ops-queue {
+  color: inherit;
+}
+
+/* Buttons and pills: match floating look a bit more */
+button,
+.btn,
+.toggle,
+.filter-chip,
+.chip,
+.pill {
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+}
+
+/* Optional: make the hourly cards slightly darker for readability */
+.hour-card,
+.forecast-day {
+  background: rgba(9, 14, 12, 0.66);
+}
+
+/* Optional: side list and detail pane a touch stronger */
+.plant-list,
+.sidebar,
+.detail-panel,
+.plant-detail,
+.list-panel {
+  background: rgba(9, 14, 12, 0.70);
+}
+
+/* Mobile fallback: fixed backgrounds can be janky on some devices */
+@media (max-width: 900px) {
+  body {
+    background-attachment: scroll;
+  }
+}
