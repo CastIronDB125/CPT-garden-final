@@ -4,9 +4,9 @@
 :root{
   --bg:#08100c;
   --bg-soft:#0d1711;
-  --panel:rgba(14,22,17,.64);
-  --panel-strong:rgba(12,19,15,.78);
-  --panel-soft:rgba(20,28,22,.52);
+  --panel:rgba(14,22,17,.72);
+  --panel-strong:rgba(12,19,15,.84);
+  --panel-soft:rgba(20,28,22,.60);
   --line:rgba(150,178,133,.14);
   --line-strong:rgba(150,178,133,.22);
   --text:#e3e0cf;
